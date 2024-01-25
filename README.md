@@ -40,7 +40,7 @@ cd sratoolkit.3.0.10-ubuntu64
 
 And the binary file `prefetch`、 `fastq-dump`  and `fasterq-dump` will be output into the folder `bin` in this package directory.
 
-We used  [SV_STAT]([zhuxiao/sv_stat: A fast tool for Structural Variation Statistics Evaluation (github.com)](https://github.com/zhuxiao/sv_stat)) to evaluate variant calling resultes.
+We used  [SV_STAT](https://github.com/zhuxiao/sv_stat) to evaluate variant calling resultes.
 
 ```sh
 $ wget -c https://github.com/zhuxiao/sv_stat/releases/download/0.8.0/sv_stat_0.8.0.tar.xz
@@ -75,9 +75,7 @@ gunzip HG002_SVs_Tier1_v0.6.vcf.gz
 
 ## HG002
 
-Download [HG002 PacBio CCS]([WGS of HG002 with PacBio CCS - SRA - NCBI (nih.gov)](https://www.ncbi.nlm.nih.gov/sra/SRX5327410)) data and convert them into bam files using samtools and create indexes. For convenience, we provide a shell script to help you obtain the fasta file. Firstly, you need to download `SRR_Acc_List.txt` for SRX5327410 from [NCBI Run Selector](https://www.ncbi.nlm.nih.gov/Traces/study/?acc=SRX5327410) and ensure that the file and `autofa.sh` are in the same folder. For convenience, we provide `SRR_Acc_List.txt` and `autofa.sh`, which are saved in the `doc` folder.
-
-https://www.ncbi.nlm.nih.gov/Traces/solr-proxy-be/solr-proxy-be.cgi?core=run_sel_index
+Download [HG002 PacBio CCS](https://www.ncbi.nlm.nih.gov/sra/SRX5327410) data and convert them into bam files using samtools and create indexes. For convenience, we provide a shell script and a list of accession to help you obtain the fastq file (see `doc` folder). Significantly, you need to ensure that the file and the script are in the same folder. 
 
 ```sh
 $ ./autofa.sh
@@ -141,9 +139,9 @@ $ gunzip HG002_GRCh37_CMRG_SV_v1.00.vcf.gz
 $ sv_stat -t 32 -o output -T "ASVCLR;SVDSS;DeBreak;pbsv;Sniffles2;SVIM;cuteSV" genome_variants.vcf svs_poa.vcf output_debreak.vcf output_pbsv.vcf output_sniffles.vcf variants.vcf output_cutesv.vcf HG002_GRCh37_CMRG_SV_v1.00.vcf hs37d5.fa 
 ```
 
-In generally, the results are saved to folders under their respective tool names in `output `.
+In generally, the results are saved to folders under their respective tool names in `output`.
 
-The results of this experiment are shown in table:W
+The results of this experiment are shown in table:
 
 |           | TP_user | TP_benchmark |  Recall  |
 | :-------: | :-----: | :----------: | :------: |
@@ -161,7 +159,7 @@ The results of this experiment are shown in table:W
 $ sv_stat -t 32 -o output -T "ASVCLR;SVDSS;DeBreak;pbsv;Sniffles2;SVIM;cuteSV" genome_variants.vcf svs_poa.vcf output_debreak.vcf output_pbsv.vcf output_sniffles.vcf variants.vcf output_cutesv.vcf HG002_SVs_Tier1_v0.6.vcf hs37d5.fa
 ```
 
-In generally, the results are saved to folders under their respective tool names in `output `.
+In generally, the results are saved to folders under their respective tool names in `output`.
 
 The results of this experiment are shown in table:
 
