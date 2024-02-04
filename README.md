@@ -18,8 +18,13 @@ $ ./auto_gen.sh
 And the binary file `asvclr` will be output into the folder `bin` in this package directory.
 
 ```sh
-# Get svdss pbsv sniffles svim debreak and samtools
-$ conda install svdss=1.0.5 pbsv=2.9.0 sniffles=2.2 svim=1.4.2 debreak=1.0.2 samtools  
+# Get svdss pbsv sniffles debreak cuteSV and samtools
+$ conda install svdss=1.0.5 pbsv=2.9.0 sniffles=2.2 debreak=1.0.2 cuteSV=2.1.0 samtools 
+# Get SVIM v2.0.0
+$ wget -c https://github.com/eldariont/svim/archive/refs/tags/v2.0.0.tar.gz
+$ tar -zxvf svim-2.0.0.tar.gz
+$ cd svim-2.0.0
+$ pip install .
 # We need ngmlr v0.2.7 to align fasta or fastq with reference
 $ wget https://github.com/philres/ngmlr/releases/download/v0.2.7/ngmlr-0.2.7-linux-x86_64.tar.gz
 $ tar xvzf ngmlr-0.2.7-linux-x86_64.tar.gz
@@ -60,18 +65,18 @@ The reference used in our experiment is hs37d5.
 ```sh
 # Reference
 $ wget ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz
-gunzip hs37d5.fa.gz
+$ gunzip hs37d5.fa.gz
 # Extract chromosomes from 1 to 22 and X and Y
-$ samtools faidx hs37d5.fa chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY > hs37d5.fa
+$ samtools faidx hs37d5.fa 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y > hs37d5.chroms.fa
 ```
 
 ## HG002
 
-Download [HG002 PacBio CCS](https://www.ncbi.nlm.nih.gov/sra/SRX5327410) data and convert them into bam files using samtools and create indexes. For convenience, we provide a shell script and a list of accession to help you obtain the fastq file (see `doc` folder). Significantly, you need to ensure that the file and the script are in the same folder. 
+Download [HG002 PacBio CCS](https://www.ncbi.nlm.nih.gov/sra/SRX5327410) data and convert them into bam files using samtools and create indexes. For convenience, we provide a shell script and a list of accession to help you obtain the fastq file (see `doc` folder). Significantly, you need to ensure that the list file and the shell script are in the same folder. 
 
 ```sh
-$ ./autofq.sh
-$ ngmlr -t 32 --rg-id na24385_pb_ccs -r hs37d5.fa -q SRR885_whole.fastq -o H
+$ ./prefetch_fastq.sh SRR_Acc_List.txt SRR885_whole.fastq
+$ ngmlr -t 32 --rg-id na24385_pb_ccs -r hs37d5.chroms.fa -q SRR885_whole.fastq -o H
 G002_pacbio_ccs.sam
 $ samtools view -bSh -@ 32 HG002_pacbio_ccs.sam > HG002_pacbio_ccs.bam
 $ samtools sort -@ 32 -o HG002_pacbio_ccs_sorted.bam HG002_pacbio_ccs.bam
@@ -84,7 +89,7 @@ $ rm -rf HG002_pacbio_ccs.sam HG002_pacbio_ccs.bam
 
 ```sh
 # ASVCLR
-$ asvclr all -t 32 -o out_asvclr -m 20 -M 50000 hs37d5.fa HG002_PacBio_CCS_sorted.bam
+$ asvclr all -t 32 -o out_asvclr -m 20 -M 50000 hs37d5.chroms.fa HG002_PacBio_CCS_sorted.bam
 ```
 
 More  detailed usage of ASVCLR can be obtained from Github([ASVCLR](https://github.com/zhuxiao/asvclr)).
@@ -93,31 +98,33 @@ You can get variant detection results in folder `4_results` and variant detectio
 
 ```sh
 # SVDSS
-$ SVDSS index --threads 32 --fasta hs37d5.fa --index hs37d5.bwt
-$ SVDSS smooth --threads 32 --bam HG002_pacbio_ccs_sorted.bam --reference hs37d5.fa --workdir $PWD
-$ SVDSS search --threads 32 --index hs37d5.bwt --bam smoothed.selective.bam --workdir $PWD
-$ SVDSS assemble --threads 32 --workdir $PWD --batches 9 
-$ SVDSS call --threads 32 --min-sv-length 20 --workdir $PWD --bam smoothed.selective.bam --reference hs37d5.fa
+$ SVDSS index --threads 32 --reference hs37d5.chroms.fa --index hs37d5.chroms.fmd
+$ SVDSS smooth --threads 32 --reference hs37d5.chroms.fa --bam HG002_pacbio_ccs_sorted.bam > HG002_pacbio_ccs_sorted_smoothed.bam
+$ samtools index HG002_pacbio_ccs_sorted_smoothed.bam
+$ SVDSS search --threads 32 --index hs37d5.chroms.fmd --bam HG002_pacbio_ccs_sorted_smoothed.bam > specifics.txt
+$ SVDSS call --threads 32 --reference hs37d5.chroms.fa --bam HG002_pacbio_ccs_sorted_smoothed.bam --sfs specifics.txt > output_svdss.vcf
 # Debreak
-$ debreak --thread 32 --min_size 20 --min_support 5 --bam HG002_pacbio_ccs_sorted.bam --outpath output_debreak --rescue_large_ins --poa --ref hs37d5.fa 
+$ debreak --thread 32 --min_size 20 --bam HG002_pacbio_ccs_sorted.bam --outpath output_debreak --rescue_large_ins --poa --ref hs37d5.chroms.fa 
+$ cd output_debreak && mv debreak.vcf output.debreak.vcf
 # SVIM
-$ svim alignment --min_sv_size 20 output_svim HG002_pacbio_ccs_sorted.bam hs37d5.fa
+$ svim alignment --min_sv_size 20 output_svim HG002_pacbio_ccs_sorted.bam hs37d5.chroms.fa
+$ cd output_svim && mv variants.vcf output_svim.vcf
 # pbsv
 $ pbsv discover -s HG002_30X_CCS HG002_pacbio_ccs_sorted.bam HG002_pacbio_ccs_sorted.svsig.gz
-$ pbsv call -j 32 --ccs hs37d5.fa HG002_pacbio_ccs_sorted.svsig.gz output_pbsv.vcf
+$ pbsv call -j 32 --ccs hs37d5.chroms.fa HG002_pacbio_ccs_sorted.svsig.gz output_pbsv.vcf
 # cuteSV
-$ cuteSV -t 32 -s 2 HG002_pacbio_ccs_sorted.bam hs37d5.fa output_cutesv.vcf $PWD
+$ cuteSV -t 32 -s 2 HG002_pacbio_ccs_sorted.bam hs37d5.chroms.fa output_cutesv.vcf $PWD
 # Sniffles2
-$ sniffles --input HG002_pacbio_ccs_sorted.bam --vcf output_min20.vcf --reference hs37d5.fa --threads 32 --minsupport 5 --minsvlen 20
+$ sniffles --input HG002_pacbio_ccs_sorted.bam --vcf output_sniffles.vcf --reference hs37d5.chroms.fa --threads 32 --minsvlen 20
 ```
 
 You can get the following four results:
 
-* **SVDSS** : `svs_poa.vcf`
+* **SVDSS** : `output_svdss.vcf`
 * **DeBreak** : `output_debreak.vcf`
 * **pbsv** : `output_pbsv.vcf`
 * **Sniffles2** : `output_sniffles.vcf`
-* **SVIM** : `variants.vcf`
+* **SVIM** : `output_svim.vcf`
 * **cuteSV** : `output_cutesv.vcf`
 
 #### CMRG analysis
@@ -129,24 +136,24 @@ To compare the results of calling variation to the CMRG callset :
 $ wget https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/CMRG_v1.00/GRCh37/StructuralVariant/HG002_GRCh37_CMRG_SV_v1.00.vcf.gz
 $ gunzip HG002_GRCh37_CMRG_SV_v1.00.vcf.gz
 # Run sv_stat against the CMRG callset and SV_STAT can evaluate multiple callsets simultaneously.
-$ sv_stat -o output_CMRG -T "ASVCLR;SVDSS;DeBreak;pbsv;Sniffles2;SVIM;cuteSV" genome_variants.vcf svs_poa.vcf output_debreak.vcf output_pbsv.vcf output_sniffles.vcf variants.vcf output_cutesv.vcf HG002_GRCh37_CMRG_SV_v1.00.vcf hs37d5.fa 
+$ sv_stat -o output_CMRG -T "ASVCLR;SVDSS;DeBreak;pbsv;Sniffles2;SVIM;cuteSV" genome_variants.vcf output_svdss.vcf output_debreak.vcf output_pbsv.vcf output_sniffles.vcf output_svim.vcf output_cutesv.vcf HG002_GRCh37_CMRG_SV_v1.00.vcf hs37d5.chroms.fa 
 ```
 
 In generally, the results are saved to folders under their respective tool names in `output_CMRG`.
 
 The results of this experiment are shown in table:
 
-|           | TP_user | TP_benchmark |  Recall  |
-| :-------: | :-----: | :----------: | :------: |
-|  ASVCLR   |   180   |     187      | 0.795745 |
-|   SVDSS   |   212   |     209      | 0.889326 |
-|  DeBreak  |   125   |     132      | 0.561702 |
-|   pbsv    |   196   |     202      | 0.856574 |
-| Sniffles2 |   211   |     214      | 0.910638 |
-|   SVIM    |   230   |     220      | 0.936170 |
-|  cuteSV   |   183   |     194      | 0.825532 |
+|           | TP_bench | TP_user | Recall |
+| :-------: | :------: | :-----: | :----: |
+|  ASVCLR   |   212    |   206   |  90.2  |
+|   SVDSS   |   209    |   220   |  88.9  |
+|  DeBreak  |   216    |   203   |  91.9  |
+|   pbsv    |   226    |   227   |  96.1  |
+| Sniffles2 |   215    |   215   |  91.4  |
+|   SVIM    |   220    |   241   |  93.6  |
+|  cuteSV   |   202    |   190   |  85.9  |
 
-More detailed result information can be found in `evaluation_report.html`.
+More detailed results information can be found in `evaluation_report.html`.
 
 #### GIAB analysis
 
@@ -154,24 +161,24 @@ More detailed result information can be found in `evaluation_report.html`.
 # Get GIAB VCF Tier 1 
 $ wget https://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/data/AshkenazimTrio/analysis/NIST_SVs_Integration_v0.6/HG002_SVs_Tier1_v0.6.vcf.gz
 gunzip HG002_SVs_Tier1_v0.6.vcf.gz
-$ sv_stat -o output_giab_Tier1 -T "ASVCLR;SVDSS;DeBreak;pbsv;Sniffles2;SVIM;cuteSV" genome_variants.vcf svs_poa.vcf output_debreak.vcf output_pbsv.vcf output_sniffles.vcf variants.vcf output_cutesv.vcf HG002_SVs_Tier1_v0.6.vcf hs37d5.fa
+$ sv_stat -o output_giab_Tier1 -T "ASVCLR;SVDSS;DeBreak;pbsv;Sniffles2;SVIM;cuteSV" genome_variants.vcf output_svdss.vcf output_debreak.vcf output_pbsv.vcf output_sniffles.vcf output_svim.vcf output_cutesv.vcf HG002_SVs_Tier1_v0.6.vcf hs37d5.chroms.fa
 ```
 
 In generally, the results are saved to folders under their respective tool names in `output_giab_Tier1`.
 
 The results of analysis are shown in table:
 
-|           | Precision | F1-score |  Recall  |
-| :-------: | :-------: | :------: | :------: |
-|  ASVCLR   | 0.793446  | 0.660873 | 0.566260 |
-|   SVDSS   | 0.803384  | 0.583478 | 0.458088 |
-|  DeBreak  | 0.817189  | 0.674359 | 0.574029 |
-|   pbsv    | 0.652436  | 0.56085  | 0.491812 |
-| Sniffles2 | 0.777225  | 0.670102 | 0.588932 |
-|   SVIM    | 0.560031  | 0.593852 | 0.632019 |
-|  cuteSV   | 0.829295  | 0.640409 | 0.521605 |
+|           | Precision | Recall | F1-score | TP    | Time(min) | Peak Mem.(GiB)    |
+| :-------: | :-------: | :----: | :------: | ----- | --------- | ----------------- |
+|  ASVCLR   |   82.8    |  59.5  |   69.3   | 42206 | 29.28     | 17.6 (threads=32) |
+|   SVDSS   |   80.0    |  46.3  |   58.7   | 36813 | 124.7     | 11.8 (threads=32) |
+|  DeBreak  |   84.0    |  59.0  |   69.3   | 41177 | 18.2      | 8.6 (threads=32)  |
+|   pbsv    |   80.4    |  59.4  |   68.3   | 42261 | 65.18     | 21.3(threads=32)  |
+| Sniffles2 |   79.4    |  59.5  |   68.0   | 42162 | 0.8       | 2.9(threads=32)   |
+|   SVIM    |   58.8    |  64.1  |   61.3   | 46416 | 20.6      | 1.1 (threads=1)   |
+|  cuteSV   |   84.5    |  53.0  |   65.1   | 36862 | 0.85      | 2.1(threads=32)   |
 
-More detailed result information can be found in `evaluation_report.html`.
+More detailed results information can be found in `evaluation_report.html`.
 
 ## Contact
 
