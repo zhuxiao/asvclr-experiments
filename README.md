@@ -143,17 +143,17 @@ In generally, the results are saved to folders under their respective tool names
 
 The results of this experiment are shown in table:
 
-|           | TP_bench | TP_user | Recall |
-| :-------: | :------: | :-----: | :----: |
-|  ASVCLR   |   212    |   206   |  90.2  |
-|   SVDSS   |   209    |   220   |  88.9  |
-|  DeBreak  |   216    |   203   |  91.9  |
-|   pbsv    |   226    |   227   |  96.1  |
-| Sniffles2 |   215    |   215   |  91.4  |
-|   SVIM    |   220    |   241   |  93.6  |
-|  cuteSV   |   202    |   190   |  85.9  |
+|           | SVs_bench | TP_bench | TP_user | Recall |
+| :-------- | --------- | :------- | :------ | :----- |
+| ASVCLR    | 235       | 212      | 206     | 0.9021 |
+| SVDSS     | 235       | 209      | 220     | 0.8893 |
+| DeBreak   | 235       | 216      | 203     | 0.9191 |
+| pbsv      | 235       | 226      | 227     | 0.9617 |
+| Sniffles2 | 235       | 215      | 215     | 0.9148 |
+| SVIM      | 235       | 220      | 241     | 0.9361 |
+| cuteSV    | 235       | 202      | 190     | 0.8595 |
 
-More detailed results information can be found in `evaluation_report.html`.
+More detailed experimental results can be seen in the `sv_stat_reports.html` file in the `output_CRMG` folder.
 
 #### GIAB analysis
 
@@ -168,17 +168,17 @@ In generally, the results are saved to folders under their respective tool names
 
 The results of analysis are shown in table:
 
-|           | Precision | Recall | F1-score | TP    | Time(min) | Peak Mem.(GiB)    |
-| :-------: | :-------: | :----: | :------: | ----- | --------- | ----------------- |
-|  ASVCLR   |   82.8    |  59.5  |   69.3   | 42206 | 29.28     | 17.6 (threads=32) |
-|   SVDSS   |   80.0    |  46.3  |   58.7   | 36813 | 124.7     | 11.8 (threads=32) |
-|  DeBreak  |   84.0    |  59.0  |   69.3   | 41177 | 18.2      | 8.6 (threads=32)  |
-|   pbsv    |   80.4    |  59.4  |   68.3   | 42261 | 65.18     | 21.3(threads=32)  |
-| Sniffles2 |   79.4    |  59.5  |   68.0   | 42162 | 0.8       | 2.9(threads=32)   |
-|   SVIM    |   58.8    |  64.1  |   61.3   | 46416 | 20.6      | 1.1 (threads=1)   |
-|  cuteSV   |   84.5    |  53.0  |   65.1   | 36862 | 0.85      | 2.1(threads=32)   |
+|           | Precision | Recall | F1-score | TP_bench | TP_user | Time(min) | Peak Mem.(GiB) | Threads |
+| :-------: | :-------: | :----: | :------: | -------- | ------- | --------- | -------------- | ------- |
+|  ASVCLR   |  0.8283   | 0.5958 |  0.6931  | 44103    | 42206   | 29.3      | 17.6           | 32      |
+|   SVDSS   |  0.8004   | 0.4635 |  0.5871  | 34308    | 36813   | 124.7     | 11.8           | 32      |
+|  DeBreak  |  0.8409   | 0.5902 |  0.6936  | 43687    | 41177   | 18.2      | 8.6            | 32      |
+|   pbsv    |  0.8040   | 0.5947 |  0.6837  | 44021    | 42261   | 65.2      | 21.3           | 32      |
+| Sniffles2 |  0.7942   | 0.5959 |  0.6809  | 44109    | 42162   | 0.8       | 2.9            | 32      |
+|   SVIM    |  0.5887   | 0.6415 |  0.6139  | 47480    | 46416   | 20.6      | 1.1            | 1       |
+|  cuteSV   |  0.8458   | 0.5304 |  0.6519  | 39257    | 36862   | 0.9       | 2.1            | 32      |
 
-More detailed results information can be found in `evaluation_report.html`.
+More detailed experimental results can be seen in the `sv_stat_reports.html` file in the `output_giab_Tier1` folder.
 
 ## Contact
 
