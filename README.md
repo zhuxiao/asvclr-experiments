@@ -1,6 +1,6 @@
 # ASVCLR experiments
 
-ASVCLR-experiment introduces the general process of the experiment. This includes prerequisites, using different tools for variation detection, and comparing the detection results of ASVCLR with other tools. The detailed usages and  information of ASVCLR can be found at GitHub ([ASVCLR](https://github.com/zhuxiao/asvclr)).
+ASVCLR-experiment introduces the general process of the experiment. This includes prerequisites, using different tools for variation detection, and comparing the detection results of ASVCLR with other tools. The detailed usages and information of ASVCLR can be found at GitHub ([ASVCLR](https://github.com/zhuxiao/asvclr)).
 
 ## Prerequisites
 
@@ -12,12 +12,12 @@ $ cd asvclr_1.4.0/
 $ ./auto_gen.sh
 # Or get from github 
 $ git clone https://github.com/zhuxiao/asvclr.git
-$ tar -xf asvclr_1.4.0.tar.xz
-$ cd asvclr_1.4.0/
+$ cd asvclr
 $ ./auto_gen.sh
+$ cd bin && ln -s asvclr /usr/local/bin
 ```
 
-And the binary file `asvclr` will be output into the folder `bin` in this package directory.
+And the binary file `asvclr` will be output into the folder `bin` in this package directory and link it to the `bin` folder under the username folder, or to the `bin` directory under the `usr` folder that requires higher permissions.
 
 ```sh
 # Get svdss pbsv sniffles debreak cuteSV and samtools
@@ -39,13 +39,19 @@ $ make
 $ wget -c https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/3.0.10/sratoolkit.3.0.10-centos_linux64.tar.gz
 $ tar -zxvf sratoolkit.3.0.10-centos_linux64.tar.gz
 $ cd sratoolkit.3.0.10-centos/bin/
+$ ln -s prefetch /home/usrname/bin
+$ ln -s fastq-dump /home/usrname/bin
+$ ln -s fasterq-dump /home/usrname/bin
 # ubuntu
 $ wget -c https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/3.0.10/sratoolkit.3.0.10-ubuntu64.tar.gz
 $ tar -zxvf sratoolkit.3.0.10-ubuntu64.tar.gz
-$ cd sratoolkit.3.0.10-ubuntu64
+$ cd sratoolkit.3.0.10-ubuntu64/bin/
+$ ln -s prefetch /usr/local/bin
+$ ln -s fastq-dump /usr/local/bin
+$ ln -s fasterq-dump /usr/local/bin
 ```
 
-And the binary file `prefetch`、 `fastq-dump`  and `fasterq-dump` will be output into the folder `bin` in this package directory.
+And the binary file `prefetch`、 `fastq-dump` and `fasterq-dump` will be output into the folder `bin` in this package directory,and it is necessary to link to the `bin` folder under the username folder, or to the `bin` directory under the `usr` folder that requires higher permissions.
 
 We used  [SV_STAT](https://github.com/zhuxiao/sv_stat) to evaluate variant calling results.
 
@@ -54,6 +60,7 @@ $ wget -c https://github.com/zhuxiao/sv_stat/releases/download/0.9.0/sv_stat_0.9
 $ tar -xf sv_stat_0.9.0.tar.xz
 $ cd sv_stat_0.9.0/
 $ ./autogen.sh
+$ ln -s 
 ```
 
 And the binary file `sv_stat` will be output into the folder `bin` in this package directory.
@@ -101,11 +108,11 @@ You can get variant detection results in folder `4_results` and variant detectio
 $ SVDSS index --threads 32 --reference hs37d5.fa --index hs37d5.chroms.fmd
 $ SVDSS smooth --threads 32 --reference hs37d5.fa --bam HG002_pacbio_ccs_sorted.bam > HG002_pacbio_ccs_sorted_smoothed.bam
 $ samtools index HG002_pacbio_ccs_sorted_smoothed.bam
-$ SVDSS search --threads 32 --index hs37d5.chroms.fmd --bam HG002_pacbio_ccs_sorted_smoothed.bam > specifics.txt
+$ SVDSS search --threads 32 --index hs37d5.fmd --bam HG002_pacbio_ccs_sorted_smoothed.bam > specifics.txt
 $ SVDSS call --threads 32 --reference hs37d5.fa --bam HG002_pacbio_ccs_sorted_smoothed.bam --sfs specifics.txt > output_svdss.vcf
-# Debreak
+# DeBreak
 $ debreak --thread 32 --min_size 20 --bam HG002_pacbio_ccs_sorted.bam --outpath output_debreak --rescue_large_ins --poa --ref hs37d5.fa 
-$ cd output_debreak && mv debreak.vcf output.debreak.vcf
+$ cd output_debreak && mv debreak.vcf output_debreak.vcf
 # SVIM
 $ svim alignment --min_sv_size 20 output_svim HG002_pacbio_ccs_sorted.bam hs37d5.fa
 $ cd output_svim && mv variants.vcf output_svim.vcf
@@ -127,7 +134,7 @@ You can get the following four results:
 * **SVIM** : `output_svim.vcf`
 * **cuteSV** : `output_cutesv.vcf`
 
-For convenience, the variation detection results of all tools are included in the `results` folder. For convenience, the mutation detection results of all tools are included in the results folder. Due to the large size of `output_debreak.vcf`, we chose to use bcftools to split and upload.
+For convenience, the variation detection results of all tools are included in the `results` folder. Due to the large size of `output_debreak.vcf`, we chose to use bcftools to split and upload.
 
 #### CMRG analysis
 
@@ -155,7 +162,7 @@ The results of this experiment are shown in table:
 | SVIM      | 235       | 220      | 241     | 0.9361 |
 | cuteSV    | 235       | 202      | 190     | 0.8595 |
 
-More detailed experimental results can be seen in the `sv_stat_reports.html` file in the `output_CRMG` folder.
+More detailed experimental results can be seen in the `sv_stat_reports.html` file in the `output_CMRG` folder.
 
 #### GIAB analysis
 
@@ -184,9 +191,10 @@ More detailed experimental results can be seen in the `sv_stat_reports.html` fil
 
 The results can also be observed through the bar chart generated by SV-STAT, as follows:
 
-![result_classification](https://github.com/zhuxiao/asvclr-experiments/blob/origin/images/result_classification.png "Result_Classification")
-
-![evaluation_result](https://github.com/zhuxiao/asvclr-experiments/blob/origin/images/evaluation_result.png "Evaluation_Classification")
+<div style="text-align: center;">
+    <img src="images\result_classification.png" alt="Performance comparison between different tools" style="display: inline-block; margin-right: 20px;" width="400"/>
+    <img src="images\evaluation_result.png" alt="Benchmark results between different tools" style="display: inline-block;" width="400"/>
+</div>
 
 ## Contact
 
