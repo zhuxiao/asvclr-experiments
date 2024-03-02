@@ -38,10 +38,10 @@ $ make
 # centOS
 $ wget -c https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/3.0.10/sratoolkit.3.0.10-centos_linux64.tar.gz
 $ tar -zxvf sratoolkit.3.0.10-centos_linux64.tar.gz
-$ cd sratoolkit.3.0.10-centos/bin/
-$ ln -s prefetch /home/usrname/bin
-$ ln -s fastq-dump /home/usrname/bin
-$ ln -s fasterq-dump /home/usrname/bin
+$ cd sratoolkit.3.0.10-centos
+$ ln -s prefetch /usr/local/bin
+$ ln -s fastq-dump /usr/local/bin
+$ ln -s fasterq-dump /usr/local/bin
 # ubuntu
 $ wget -c https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/3.0.10/sratoolkit.3.0.10-ubuntu64.tar.gz
 $ tar -zxvf sratoolkit.3.0.10-ubuntu64.tar.gz
@@ -51,7 +51,7 @@ $ ln -s fastq-dump /usr/local/bin
 $ ln -s fasterq-dump /usr/local/bin
 ```
 
-And the binary file `prefetch`、 `fastq-dump` and `fasterq-dump` will be output into the folder `bin` in this package directory,and it is necessary to link to the `bin` folder under the username folder, or to the `bin` directory under the `usr` folder that requires higher permissions.
+And the binary file `prefetch`、 `fastq-dump` and `fasterq-dump` will be output into the folder `bin` in this package directory, and it is necessary to link to the `bin` folder under the username folder, or to the `bin` directory under the `usr` folder that requires higher permissions.
 
 We used  [SV_STAT](https://github.com/zhuxiao/sv_stat) to evaluate variant calling results.
 
@@ -60,7 +60,7 @@ $ wget -c https://github.com/zhuxiao/sv_stat/releases/download/0.9.0/sv_stat_0.9
 $ tar -xf sv_stat_0.9.0.tar.xz
 $ cd sv_stat_0.9.0/
 $ ./autogen.sh
-$ ln -s 
+$ cd bin && ln -s sv_stat /usr/local/bin 
 ```
 
 And the binary file `sv_stat` will be output into the folder `bin` in this package directory.
@@ -145,22 +145,22 @@ To compare the results of calling variation to the CMRG callset :
 $ wget https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/CMRG_v1.00/GRCh37/StructuralVariant/HG002_GRCh37_CMRG_SV_v1.00.vcf.gz
 $ gunzip HG002_GRCh37_CMRG_SV_v1.00.vcf.gz
 # Run sv_stat against the CMRG callset and SV_STAT can evaluate multiple callsets simultaneously.
-$ sv_stat -o output_CMRG -T "ASVCLR;SVDSS;DeBreak;pbsv;Sniffles2;SVIM;cuteSV" genome_variants.vcf output_svdss.vcf output_debreak.vcf output_pbsv.vcf output_sniffles.vcf output_svim.vcf output_cutesv.vcf HG002_GRCh37_CMRG_SV_v1.00.vcf hs37d5.fa 
+$ sv_stat -o output_CMRG -s 200 -C "1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;17;18;19;20;21;22;X;Y" -T "ASVCLR;SVDSS;DeBreak;pbsv;Sniffles2;SVIM;cuteSV" genome_variants.vcf output_svdss.vcf output_debreak.vcf output_pbsv.vcf output_sniffles.vcf output_svim.vcf output_cutesv.vcf HG002_GRCh37_CMRG_SV_v1.00.vcf hs37d5.fa 
 ```
 
 In generally, the results are saved to folders under their respective tool names in `output_CMRG`.
 
 The results of this experiment are shown in table:
 
-|           | SVs_bench | TP_bench | TP_user | Recall |
-| :-------- | --------- | :------- | :------ | :----- |
-| ASVCLR    | 235       | 228      | 222     | 0.9702 |
-| SVDSS     | 235       | 209      | 220     | 0.8893 |
-| DeBreak   | 235       | 216      | 203     | 0.9191 |
-| pbsv      | 235       | 226      | 227     | 0.9617 |
-| Sniffles2 | 235       | 215      | 215     | 0.9148 |
-| SVIM      | 235       | 220      | 241     | 0.9361 |
-| cuteSV    | 235       | 202      | 190     | 0.8595 |
+|           | SVs_bench | TP_bench | TP_user | Recall | Seqcons |
+| :-------- | --------- | :------- | :------ | :----- | ------- |
+| ASVCLR    | 235       | 228      | 222     | 0.9702 | 0.9301  |
+| SVDSS     | 235       | 209      | 220     | 0.8893 | 0.9663  |
+| DeBreak   | 235       | 216      | 203     | 0.9191 | 0.9341  |
+| pbsv      | 235       | 226      | 227     | 0.9617 | 0.9835  |
+| Sniffles2 | 235       | 215      | 215     | 0.9148 | 0.9309  |
+| SVIM      | 235       | 220      | 241     | 0.9361 | 0.9802  |
+| cuteSV    | 235       | 202      | 190     | 0.8595 | 0.9250  |
 
 More detailed experimental results can be seen in the `sv_stat_reports.html` file in the `output_CMRG` folder.
 
@@ -170,22 +170,22 @@ More detailed experimental results can be seen in the `sv_stat_reports.html` fil
 # Get GIAB VCF Tier 1 
 $ wget https://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/data/AshkenazimTrio/analysis/NIST_SVs_Integration_v0.6/HG002_SVs_Tier1_v0.6.vcf.gz
 gunzip HG002_SVs_Tier1_v0.6.vcf.gz
-$ sv_stat -o output_giab_Tier1 -s 200 -T "ASVCLR;SVDSS;DeBreak;pbsv;Sniffles2;SVIM;cuteSV" genome_variants.vcf output_svdss.vcf output_debreak.vcf output_pbsv.vcf output_sniffles.vcf output_svim.vcf output_cutesv.vcf HG002_SVs_Tier1_v0.6.vcf hs37d5.fa
+$ sv_stat -o output_giab_Tier1 -s 200 -C "1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;17;18;19;20;21;22;X;Y" -T "ASVCLR;SVDSS;DeBreak;pbsv;Sniffles2;SVIM;cuteSV" genome_variants.vcf output_svdss.vcf output_debreak.vcf output_pbsv.vcf output_sniffles.vcf output_svim.vcf output_cutesv.vcf HG002_SVs_Tier1_v0.6.vcf hs37d5.fa
 ```
 
 In generally, the results are saved to folders under their respective tool names in `output_giab_Tier1`. In addition, the evaluation results of all tools are uploaded to `output_giab_Tier1` in the `analysis` folder(The `convert` folder is not included because the files is too large and only works during the evaluation process).
 
 The results of analysis are shown in table:
 
-|           | SVs_bench | SVs_user | TP_bench | TP_user |  FP   |  FN   | Precision | Recall   | F1-Score | Time(min) | Peak Mem.(GiB) | Threads |
-| :-------: | --------- | -------- | -------- | ------- | :---: | :---: | --------- | -------- | -------- | --------- | -------------- | ------- |
-|  ASVCLR   | 74012     | 53170    | 45694    | 44180   | 8990  | 28318 | 0.617386  | 0.830920 | 0.708412 | 29.3      | 17.6           | 32      |
-|   SVDSS   | 74012     | 45990    | 34689    | 37221   | 8769  | 39323 | 0.468694  | 0.809328 | 0.593616 | 124.7     | 11.8           | 32      |
-|  DeBreak  | 74012     | 50040    | 44078    | 41458   | 7505  | 29934 | 0.595552  | 0.846721 | 0.699266 | 18.2      | 8.6            | 32      |
-|   pbsv    | 74012     | 53271    | 44494    | 42927   | 9636  | 29518 | 0.601173  | 0.816677 | 0.692547 | 65.2      | 21.3           | 32      |
-| Sniffles2 | 74012     | 54261    | 44658    | 42801   | 10284 | 29354 | 0.603389  | 0.806273 | 0.690231 | 0.8       | 2.9            | 32      |
-|   SVIM    | 74012     | 117556   | 48028    | 47230   | 31612 | 25984 | 0.648922  | 0.599046 | 0.622987 | 20.6      | 1.1            | 1       |
-|  cuteSV   | 74012     | 45233    | 39685    | 37172   | 6406  | 34327 | 0.536197  | 0.852999 | 0.658475 | 0.9       | 2.1            | 32      |
+|           | SVs_bench | SVs_user | TP_bench | TP_user | FP    |  FN   | Precision | Recall | F1-Score | Seqcons | Time(min) | Peak Mem.(GiB) | Threads |
+| :-------- | :-------- | -------- | -------- | ------- | :---- | :---: | --------- | ------ | -------- | ------- | --------- | -------------- | ------- |
+| ASVCLR    | 74012     | 53170    | 45694    | 44180   | 8677  | 28318 | 0.8358    | 0.6173 | 0.7101   | 0.9201  | 50.8      | 20.6           | 32      |
+| SVDSS     | 74012     | 45990    | 34689    | 37221   | 8566  | 39323 | 0.8129    | 0.4686 | 0.5945   | 0.9422  | 124.7     | 11.8           | 32      |
+| DeBreak   | 74012     | 50040    | 44078    | 41458   | 7355  | 29934 | 0.8493    | 0.5955 | 0.7001   | 0.9262  | 18.2      | 8.6            | 32      |
+| pbsv      | 74012     | 53271    | 44494    | 42927   | 9253  | 29518 | 0.8226    | 0.6011 | 0.6946   | 0.9677  | 65.2      | 21.3           | 32      |
+| Sniffles2 | 74012     | 54261    | 44658    | 42801   | 10002 | 29354 | 0.8105    | 0.6033 | 0.6902   | 0.9165  | 0.8       | 2.9            | 32      |
+| SVIM      | 74012     | 117556   | 48028    | 47230   | 30995 | 25984 | 0.6037    | 0.6489 | 0.6255   | 0.9581  | 20.6      | 1.1            | 1       |
+| cuteSV    | 74012     | 45233    | 39685    | 37172   | 6151  | 34327 | 0.8580    | 0.5361 | 0.6599   | 0.9224  | 0.9       | 2.1            | 32      |
 
 More detailed experimental results can be seen in the `sv_stat_reports.html` file in the `output_giab_Tier1` folder.
 
@@ -195,6 +195,7 @@ The results can also be observed through the bar chart generated by SV-STAT, as 
     <img src="images\result_classification.png" alt="Performance comparison between different tools" style="display: inline-block; margin-right: 20px;" width="400"/>
     <img src="images\evaluation_result.png" alt="Benchmark results between different tools" style="display: inline-block;" width="400"/>
 </div>
+
 
 ## Contact
 
