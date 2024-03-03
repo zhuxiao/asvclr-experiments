@@ -134,8 +134,11 @@ You can get the following four results:
 * **SVIM** : `output_svim.vcf`
 * **cuteSV** : `output_cutesv.vcf`
 
-For convenience, the variation detection results of all tools are included in the `results` folder. Due to the large size of `output_debreak.vcf`, we chose to use bcftools to split and upload.
-
+For convenience, the variation detection results of all tools are included in the `results` folder. Due to the large size of `output_debreak.vcf`, we chose to use split command to split and upload. After decompression, you can use the cat command to merge it into output_debreak.vcf.
+```sh
+# merge to get vcf
+$ cat split_debreak* > output_debreak.vcf
+```
 #### CMRG analysis
 
 To compare the results of calling variation to the CMRG callset :
