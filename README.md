@@ -56,9 +56,9 @@ And the binary file `prefetch`、 `fastq-dump` and `fasterq-dump` will be output
 We used  [SV_STAT](https://github.com/zhuxiao/sv_stat) to evaluate variant calling results.
 
 ```sh
-$ wget -c https://github.com/zhuxiao/sv_stat/releases/download/0.9.0/sv_stat_0.9.0.tar.xz
-$ tar -xf sv_stat_0.9.0.tar.xz
-$ cd sv_stat_0.9.0/
+$ wget -c https://github.com/zhuxiao/sv_stat/releases/download/0.9.0/sv_stat_1.0.0.tar.xz
+$ tar -xf sv_stat_1.0.0.tar.xz
+$ cd sv_stat_1.0.0/
 $ ./autogen.sh
 $ cd bin && ln -s sv_stat /usr/local/bin 
 ```
